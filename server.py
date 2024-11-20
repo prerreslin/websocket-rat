@@ -40,5 +40,5 @@ async def send_command(command: str):
     await manager.broadcast(command)
     return {"message": f"Команда '{command}' отправлена всем подключённым клиентам"}
 
-if __name__ == "__main__":
-    run(app=app,port=5000)
+# if __name__ == "__main__":
+#     run(app=app,port=5000)
