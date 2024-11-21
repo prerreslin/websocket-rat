@@ -21,10 +21,10 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()
-            print(f"Получено от клиента: {data}")
+            print(f"Прийшло від кліента: {data}")
     except WebSocketDisconnect:
         connected_clients.remove(websocket)
-        print("Клиент отключился")
+        print("Кліент відключився")
 
 class Command(BaseModel):
     command: str
@@ -33,13 +33,12 @@ class Command(BaseModel):
 async def send_command(cmd: Command):
     if not cmd.command:
         raise HTTPException(status_code=400, detail="Command is required")
-    print(f"Получена команда: {cmd.command}")
+    print(f"Прийшла команда: {cmd.command}")
     
-    # Рассылаем сообщение всем подключённым клиентам
     for client in connected_clients:
         try:
             await client.send_text(cmd.command)
         except Exception as e:
-            print(f"Ошибка отправки: {e}")
+            print(f"Помилка відправки: {e}")
     
     return {"status": "success", "command": cmd.command}
