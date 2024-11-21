@@ -1,10 +1,9 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+import asyncio
 
 app = FastAPI()
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,8 +20,8 @@ async def websocket_endpoint(websocket: WebSocket):
     connected_clients.append(websocket)
     try:
         while True:
-            data = await websocket.receive_text()  # Ждем сообщения от клиента
-            print(f"Получено: {data}")
+            data = await websocket.receive_text()
+            print(f"Получено от клиента: {data}")
     except WebSocketDisconnect:
         connected_clients.remove(websocket)
         print("Клиент отключился")
@@ -35,4 +34,12 @@ async def send_command(cmd: Command):
     if not cmd.command:
         raise HTTPException(status_code=400, detail="Command is required")
     print(f"Получена команда: {cmd.command}")
+    
+    # Рассылаем сообщение всем подключённым клиентам
+    for client in connected_clients:
+        try:
+            await client.send_text(cmd.command)
+        except Exception as e:
+            print(f"Ошибка отправки: {e}")
+    
     return {"status": "success", "command": cmd.command}
